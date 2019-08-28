@@ -3,7 +3,7 @@
 // Authors:
 //   Klaus Potzesny
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -163,6 +163,9 @@ namespace MigraDoc.RtfRendering
         /// </summary>
         private void WriteDocument()
         {
+            if (Document.EmbeddedFiles.Count > 0)
+                throw new InvalidOperationException("Embedded files are not supported in RTF documents.");
+
             RtfFlattenVisitor flattener = new RtfFlattenVisitor();
             flattener.Visit(_document);
             Prepare();

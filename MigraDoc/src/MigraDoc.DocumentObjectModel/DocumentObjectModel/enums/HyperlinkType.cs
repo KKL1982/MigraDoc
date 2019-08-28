@@ -5,7 +5,7 @@
 //   Klaus Potzesny
 //   David Stephensen
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -46,6 +46,18 @@ namespace MigraDoc.DocumentObjectModel
         /// Targets a position in the document. Same as 'Local'.
         /// </summary>
         Bookmark = Local,
+
+        /// <summary>
+        /// Targets a position in another PDF document.
+        /// This is only supported in PDF. In RTF the other document is opened, but the target position is not moved to.
+        /// </summary>
+        ExternalBookmark,
+
+        /// <summary>
+        /// Targets a position in an embedded document in this or another root PDF document.
+        /// This is only supported in PDF.
+        /// </summary>
+        EmbeddedDocument,
 
         /// <summary>
         /// Targets a resource on the Internet or network. Same as 'Url'.

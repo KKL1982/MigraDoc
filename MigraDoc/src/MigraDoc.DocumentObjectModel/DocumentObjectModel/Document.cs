@@ -5,7 +5,7 @@
 //   Klaus Potzesny
 //   David Stephensen
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -144,6 +144,16 @@ namespace MigraDoc.DocumentObjectModel
         public void Add(Style style)
         {
             Styles.Add(style);
+        }
+
+        /// <summary>
+        /// Adds an embedded file to the document.
+        /// </summary>
+        /// <param name="name">The name used to refer and to entitle the embedded file.</param>
+        /// <param name="path">The path of the file to embed.</param>
+        public void AddEmbeddedFile(string name, string path)
+        {
+            EmbeddedFiles.Add(name, path);
         }
         #endregion
 
@@ -301,6 +311,21 @@ namespace MigraDoc.DocumentObjectModel
         }
         [DV]
         internal Sections _sections;
+
+        /// <summary>
+        /// Gets the embedded documents of the document.
+        /// </summary>
+        public EmbeddedFiles EmbeddedFiles
+        {
+            get { return _embeddedFiles ?? (_embeddedFiles = new EmbeddedFiles()); }
+            set
+            {
+                SetParent(value);
+                _embeddedFiles = value;
+            }
+        }
+        [DV]
+        internal EmbeddedFiles _embeddedFiles;
         #endregion
 
         /// <summary>
@@ -341,6 +366,9 @@ namespace MigraDoc.DocumentObjectModel
             serializer.EndAttributes(pos);
 
             serializer.BeginContent();
+            if (!IsNull("EmbeddedFiles"))
+                EmbeddedFiles.Serialize(serializer);
+
             Styles.Serialize(serializer);
 
             if (!IsNull("Sections"))

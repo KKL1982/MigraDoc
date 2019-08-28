@@ -5,7 +5,7 @@
 //   Klaus Potzesny
 //   David Stephensen
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -58,10 +58,10 @@ namespace MigraDoc.DocumentObjectModel
         /// Initializes a new instance of the Hyperlink class with the text the hyperlink shall content.
         /// The type will be treated as Local by default.
         /// </summary>
-        internal Hyperlink(string name, string text)
+        internal Hyperlink(string bookmarkName, string text)
             : this()
         {
-            Name = name;
+            BookmarkName = bookmarkName;
             Elements.AddText(text);
         }
 
@@ -69,10 +69,11 @@ namespace MigraDoc.DocumentObjectModel
         /// Initializes a new instance of the Hyperlink class with the type and text the hyperlink shall
         /// represent.
         /// </summary>
-        internal Hyperlink(string name, HyperlinkType type, string text)
+        internal Hyperlink(string bookmarkName, string filename, HyperlinkType type, string text)
             : this()
         {
-            Name = name;
+            BookmarkName = bookmarkName;
+            Filename = filename;
             Type = type;
             Elements.AddText(text);
         }
@@ -231,9 +232,11 @@ namespace MigraDoc.DocumentObjectModel
         /// <summary>
         /// Adds a new Bookmark.
         /// </summary>
-        public BookmarkField AddBookmark(string name)
+        /// <param name="name">The name of the bookmark.</param>
+        /// <param name="prepend">True, if the bookmark shall be inserted at the beginning of the paragraph.</param>
+        public BookmarkField AddBookmark(string name, bool prepend = true)
         {
-            return Elements.AddBookmark(name);
+            return Elements.AddBookmark(name, prepend);
         }
 
         /// <summary>
@@ -445,15 +448,80 @@ namespace MigraDoc.DocumentObjectModel
         internal Font _font;
 
         /// <summary>
-        /// Gets or sets the target name of the Hyperlink, e.g. an URL or a bookmark's name.
+        /// For HyperlinkType Local/Bookmark: Gets or sets the target bookmark name of the Hyperlink.
+        /// For HyperlinkTypes File and Url/Web: Gets or sets the target filename of the Hyperlink, e.g. a path to a file or an URL.
+        /// For HyperlinkType ExternalBookmark: Not valid - throws Exception.
+        /// This property is retained due to compatibility reasons.
         /// </summary>
         public string Name
         {
-            get { return _name.Value; }
-            set { _name.Value = value; }
+            get
+            {
+                switch (Type)
+                {
+                    case HyperlinkType.ExternalBookmark:
+                        throw new InvalidOperationException("For HyperlinkType ExternalBookmark Filename and BookmarkName must be set. Use these properties instead.");
+                    case HyperlinkType.File:
+                    case HyperlinkType.Url:
+                        return _filename.Value;
+                    default:
+                    // case HyperlinkType.Bookmark:
+                        return _bookmarkName.Value;
+                }
+            }
+            set
+            {
+                switch (Type)
+                {
+                    case HyperlinkType.ExternalBookmark:
+                        throw new InvalidOperationException("For HyperlinkType ExternalBookmark Filename and BookmarkName must be set. Use these properties instead.");
+                    case HyperlinkType.File:
+                    case HyperlinkType.Url:
+                        _filename.Value = value;
+                        break;
+                    default:
+                        // case HyperlinkType.Bookmark:
+                        _bookmarkName.Value = value;
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the target filename of the Hyperlink, e.g. a path to a file or an URL.
+        /// Used for HyperlinkTypes ExternalBookmark, File and Url/Web.
+        /// </summary>
+        public string Filename
+        {
+            get { return _filename.Value; }
+            set { _filename.Value = value; }
         }
         [DV]
-        internal NString _name = NString.NullValue;
+        internal NString _filename = NString.NullValue;
+
+        /// <summary>
+        /// Gets or sets the target bookmark name of the Hyperlink.
+        /// Used for HyperlinkTypes ExternalBookmark and Bookmark.
+        /// </summary>
+        public string BookmarkName
+        {
+            get { return _bookmarkName.Value; }
+            set { _bookmarkName.Value = value; }
+        }
+        [DV]
+        internal NString _bookmarkName = NString.NullValue;
+
+        /// <summary>
+        /// Defines if the HyperlinkType ExternalBookmark shall be opened in a new window.
+        /// If not set, the viewer application should behave in accordance with the current user preference.
+        /// </summary>
+        public HyperlinkTargetWindow NewWindow
+        {
+            get { return (HyperlinkTargetWindow)_newWindow.Value; }
+            set { _newWindow.Value = (int)value; }
+        }
+        [DV(Type = typeof(HyperlinkTargetWindow))]
+        internal NEnum _newWindow = new NEnum((int)HyperlinkTargetWindow.UserPreference, typeof(HyperlinkTargetWindow));
 
         /// <summary>
         /// Gets or sets the target type of the Hyperlink.
@@ -461,7 +529,23 @@ namespace MigraDoc.DocumentObjectModel
         public HyperlinkType Type
         {
             get { return (HyperlinkType)_type.Value; }
-            set { _type.Value = (int)value; }
+            set
+            {
+                switch (value)
+                {
+                    case HyperlinkType.File:
+                    case HyperlinkType.Url:
+                        if (!string.IsNullOrEmpty(_bookmarkName.Value) && string.IsNullOrEmpty(_filename.Value))
+                            throw new InvalidOperationException("For HyperlinkTypes File and Web/Url Filename must be set instead of BookmarkName.");
+                        break;
+                    case HyperlinkType.Bookmark:
+                        if (!string.IsNullOrEmpty(_filename.Value) && string.IsNullOrEmpty(_bookmarkName.Value))
+                            throw new InvalidOperationException("For HyperlinkType Local/Bookmark BookmarkName must be set instead of Filename.");
+                        break;
+                }
+
+                _type.Value = (int)value;
+            }
         }
         [DV(Type = typeof(HyperlinkType))]
         internal NEnum _type = NEnum.NullValue(typeof(HyperlinkType));
@@ -488,10 +572,28 @@ namespace MigraDoc.DocumentObjectModel
         /// </summary>
         internal override void Serialize(Serializer serializer)
         {
-            if (_name.Value == string.Empty)
-                throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Name", "Hyperlink"));
             serializer.Write("\\hyperlink");
-            string str = "[Name = \"" + Name.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+            var str = "[";
+
+            if (Type == HyperlinkType.ExternalBookmark || Type == HyperlinkType.File || Type == HyperlinkType.Url)
+            {
+                if (_filename.Value == string.Empty)
+                    throw new InvalidOperationException(DomSR.MissingObligatoryProperty("Filename", $"Hyperlink {Type.ToString()}"));
+                
+                str += " Filename = \"" + Filename.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+            }
+            if (Type == HyperlinkType.ExternalBookmark || Type == HyperlinkType.Bookmark || Type == HyperlinkType.EmbeddedDocument)
+            {
+                if (_bookmarkName.Value == string.Empty)
+                    throw new InvalidOperationException(DomSR.MissingObligatoryProperty("BookmarkName", $"Hyperlink {Type.ToString()}"));
+
+                str += " BookmarkName = \"" + BookmarkName.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
+            }
+            if (Type == HyperlinkType.ExternalBookmark || Type == HyperlinkType.EmbeddedDocument)
+            {
+                str += " NewWindow = " + NewWindow;
+            }
+
             if (!_type.IsNull)
                 str += " Type = " + Type;
             str += "]";

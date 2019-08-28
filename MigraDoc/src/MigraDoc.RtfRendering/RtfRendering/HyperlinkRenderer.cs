@@ -4,7 +4,7 @@
 // Authors:
 //   Klaus Potzesny
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -57,13 +57,13 @@ namespace MigraDoc.RtfRendering
             _rtfWriter.StartContent();
             _rtfWriter.WriteControl("fldinst", true);
             _rtfWriter.WriteText("HYPERLINK ");
-            string name = _hyperlink.Name;
+            string name = _hyperlink.Filename;
             if (_hyperlink.IsNull("Type") || _hyperlink.Type == HyperlinkType.Local)
             {
-                name = BookmarkFieldRenderer.MakeValidBookmarkName(_hyperlink.Name);
+                name = BookmarkFieldRenderer.MakeValidBookmarkName(_hyperlink.BookmarkName);
                 _rtfWriter.WriteText(@"\l ");
             }
-            else if (_hyperlink.Type == HyperlinkType.File)
+            else if (_hyperlink.Type == HyperlinkType.File || _hyperlink.Type == HyperlinkType.ExternalBookmark) // Open at least the document for external bookmarks (in PDF: Links to external named destinations).
             {
                 string workingDirectory = _docRenderer.WorkingDirectory;
                 if (workingDirectory != null)

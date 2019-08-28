@@ -3,7 +3,7 @@
 // Authors:
 //   Klaus Potzesny
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -184,6 +184,12 @@ namespace MigraDoc.Rendering
                 _pdfDocument = CreatePdfDocument();
                 if (_document.UseCmykColor)
                     _pdfDocument.Options.ColorMode = PdfColorMode.Cmyk;
+            }
+
+            // Add embedded files, that are defined in MigraDoc _document to PDFsharp _pdfDocument.
+            foreach (EmbeddedFile embeddedFile in _document.EmbeddedFiles)
+            {
+                _pdfDocument.AddEmbeddedFile(embeddedFile.Name, embeddedFile.Path);
             }
 
             WriteDocumentInformation();

@@ -5,7 +5,7 @@
 //   Klaus Potzesny
 //   David Stephensen
 //
-// Copyright (c) 2001-2017 empira Software GmbH, Cologne Area (Germany)
+// Copyright (c) 2001-2019 empira Software GmbH, Cologne Area (Germany)
 //
 // http://www.pdfsharp.com
 // http://www.migradoc.com
@@ -118,7 +118,7 @@ namespace MigraDoc.DocumentObjectModel.Tables
         /// </summary>
         public Row AddRow()
         {
-            return _rows.AddRow();
+            return Rows.AddRow();
         }
 
         /// <summary>

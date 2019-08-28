@@ -9,8 +9,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MigraDoc</RootNamespace>
     <AssemblyName>MigraDoc.DocumentObjectModel</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -133,6 +138,7 @@
     <Compile Include="DocumentObjectModel.Tables\TableFormatter.cs" />
     <Compile Include="DocumentObjectModel.Visitors\CellComparer.cs" />
     <Compile Include="DocumentObjectModel.Visitors\DocumentObjectVisitor.cs" />
+    <Compile Include="DocumentObjectModel.Visitors\ElementsExtensions.cs" />
     <Compile Include="DocumentObjectModel.Visitors\IDomVisitable.cs" />
     <Compile Include="DocumentObjectModel.Visitors\MergedCellList.cs" />
     <Compile Include="DocumentObjectModel.Visitors\PdfFlattenVisitor.cs" />
@@ -153,6 +159,8 @@
     <Compile Include="DocumentObjectModel\DocumentObjectCollection.cs" />
     <Compile Include="DocumentObjectModel\DocumentRelations.cs" />
     <Compile Include="DocumentObjectModel\DomSR.cs" />
+    <Compile Include="DocumentObjectModel\EmbeddedFile.cs" />
+    <Compile Include="DocumentObjectModel\EmbeddedFiles.cs" />
     <Compile Include="DocumentObjectModel\enums\BorderStyle.cs" />
     <Compile Include="DocumentObjectModel\enums\BorderType.cs" />
     <Compile Include="DocumentObjectModel\enums\BreakType.cs" />
@@ -170,6 +178,7 @@
     <Compile Include="DocumentObjectModel\enums\OutlineLevel.cs" />
     <Compile Include="DocumentObjectModel\enums\PageFormat.cs" />
     <Compile Include="DocumentObjectModel\enums\ParagraphAlignment.cs" />
+    <Compile Include="DocumentObjectModel\enums\HyperlinkTargetWindow.cs" />
     <Compile Include="DocumentObjectModel\enums\StyleType.cs" />
     <Compile Include="DocumentObjectModel\enums\SymbolName.cs" />
     <Compile Include="DocumentObjectModel\enums\TabAlignment.cs" />
